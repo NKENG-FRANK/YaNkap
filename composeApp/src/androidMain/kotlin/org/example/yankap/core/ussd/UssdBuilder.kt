@@ -1,7 +1,7 @@
-package org.yankap.yankap.core.ussd
+package org.example.yankap.core.ussd
 
-import org.yankap.yankap.domain.models.Operator
-import org.yankap.yankap.domain.models.UssdOperation
+import org.example.yankap.domain.models.Operator
+import org.example.yankap.domain.models.UssdOperation
 
 object UssdBuilder {
     

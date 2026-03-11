@@ -1,4 +1,4 @@
-package org.yankap.yankap.domain.models
+package org.example.yankap.domain.models
 
 data class Transaction(
     val id: String,

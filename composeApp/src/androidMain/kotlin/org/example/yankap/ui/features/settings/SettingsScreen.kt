@@ -1,4 +1,4 @@
-package org.yankap.yankap.ui.features.settings
+package org.example.yankap.ui.features.settings
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

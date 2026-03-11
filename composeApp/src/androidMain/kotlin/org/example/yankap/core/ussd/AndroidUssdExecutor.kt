@@ -1,4 +1,4 @@
-package org.yankap.yankap.core.ussd
+package org.example.yankap.core.ussd
 
 import android.content.Context
 import android.content.Intent

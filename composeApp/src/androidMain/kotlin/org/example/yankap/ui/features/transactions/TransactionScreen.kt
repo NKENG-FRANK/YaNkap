@@ -1,4 +1,4 @@
-package org.yankap.yankap.ui.features.transactions
+package org.example.yankap.ui.features.transactions
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

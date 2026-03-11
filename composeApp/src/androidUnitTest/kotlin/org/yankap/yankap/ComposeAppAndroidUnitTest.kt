@@ -1,4 +1,4 @@
-package org.yankap.yankap
+package org.example.yankap
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

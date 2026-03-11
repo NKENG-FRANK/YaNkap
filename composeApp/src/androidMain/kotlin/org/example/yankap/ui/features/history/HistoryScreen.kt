@@ -1,4 +1,4 @@
-package org.yankap.yankap.ui.features.history
+package org.example.yankap.ui.features.history
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*

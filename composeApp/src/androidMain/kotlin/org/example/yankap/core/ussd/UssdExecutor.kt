@@ -1,4 +1,4 @@
-package org.yankap.yankap.core.ussd
+package org.example.yankap.core.ussd
 
 interface UssdExecutor {
     /**
