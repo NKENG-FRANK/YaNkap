@@ -1,5 +1,8 @@
 package org.example.yankap.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -26,9 +29,19 @@ import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PhoneEntryScreen(onSendOtp: (String) -> Unit) {
+fun PhoneEntryScreen(
+    isLoading: Boolean = false,
+    error: String? = null,
+    onSendOtp: (String) -> Unit,
+    onErrorDismissed: () -> Unit = {}
+) {
     var phoneNumber by remember { mutableStateOf("") }
     val green = Color(0xFF1A7A4A)
+
+    // Auto-dismiss error as soon as the user edits the field
+    LaunchedEffect(phoneNumber) {
+        if (error != null) onErrorDismissed()
+    }
 
     Column(
         modifier = Modifier
@@ -38,7 +51,7 @@ fun PhoneEntryScreen(onSendOtp: (String) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(60.dp))
-        
+
         Box(
             modifier = Modifier
                 .size(80.dp)
@@ -62,9 +75,9 @@ fun PhoneEntryScreen(onSendOtp: (String) -> Unit) {
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
             text = "Enter your phone number to continue",
             fontSize = 14.sp,
@@ -76,12 +89,14 @@ fun PhoneEntryScreen(onSendOtp: (String) -> Unit) {
 
         OutlinedTextField(
             value = phoneNumber,
-            onValueChange = { if (it.length <= 15) phoneNumber = it },
+            onValueChange = { if (it.length <= 9) phoneNumber = it },
             label = { Text("Phone Number") },
             placeholder = { Text("670 123 456") },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+            enabled = !isLoading,
+            isError = error != null,
             leadingIcon = {
                 Row(
                     modifier = Modifier.padding(start = 12.dp),
@@ -89,14 +104,38 @@ fun PhoneEntryScreen(onSendOtp: (String) -> Unit) {
                 ) {
                     Text("+237", fontWeight = FontWeight.Bold, color = green)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Box(modifier = Modifier.width(1.dp).height(24.dp).background(Color.LightGray))
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .height(24.dp)
+                            .background(Color.LightGray)
+                    )
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = green,
-                focusedLabelColor = green
+                focusedLabelColor = green,
+                errorBorderColor = Color(0xFFD32F2F),
+                errorLabelColor = Color(0xFFD32F2F)
             )
         )
+
+        // Error message (animated in/out)
+        AnimatedVisibility(
+            visible = error != null,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            error?.let {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = it,
+                    color = Color(0xFFD32F2F),
+                    fontSize = 13.sp,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -107,13 +146,21 @@ fun PhoneEntryScreen(onSendOtp: (String) -> Unit) {
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = green),
-            enabled = phoneNumber.length >= 8
+            enabled = phoneNumber.length >= 8 && !isLoading
         ) {
-            Text("Send OTP", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.5.dp
+                )
+            } else {
+                Text("Send OTP", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
 
         Spacer(modifier = Modifier.weight(1f))
-        
+
         Text(
             text = "By continuing, you agree to our Terms and Conditions",
             fontSize = 12.sp,
@@ -125,10 +172,23 @@ fun PhoneEntryScreen(onSendOtp: (String) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun OtpVerificationScreen(phoneNumber: String, onVerify: (String) -> Unit, onBack: () -> Unit) {
+fun OtpVerificationScreen(
+    phoneNumber: String,
+    isLoading: Boolean = false,
+    error: String? = null,
+    onVerify: (String) -> Unit,
+    onBack: () -> Unit,
+    onResend: () -> Unit = {},
+    onErrorDismissed: () -> Unit = {}
+) {
     var otpCode by remember { mutableStateOf("") }
     val green = Color(0xFF1A7A4A)
     val focusRequester = remember { FocusRequester() }
+
+    // Auto-dismiss error as soon as the user edits the OTP
+    LaunchedEffect(otpCode) {
+        if (error != null) onErrorDismissed()
+    }
 
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
@@ -140,7 +200,7 @@ fun OtpVerificationScreen(phoneNumber: String, onVerify: (String) -> Unit, onBac
             .background(Color.White)
             .padding(24.dp)
     ) {
-        IconButton(onClick = onBack) {
+        IconButton(onClick = onBack, enabled = !isLoading) {
             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
         }
 
@@ -152,32 +212,43 @@ fun OtpVerificationScreen(phoneNumber: String, onVerify: (String) -> Unit, onBac
             fontWeight = FontWeight.Bold,
             color = Color.Black
         )
-        
+
         Spacer(modifier = Modifier.height(8.dp))
-        
+
         Text(
-            text = "Enter the 4-digit code sent to +237 $phoneNumber",
+            text = "Enter the 6-digit code sent to +237 $phoneNumber",
             fontSize = 14.sp,
             color = Color.Gray
         )
 
         Spacer(modifier = Modifier.height(48.dp))
 
+        // 6-digit OTP boxes
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
+                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally)
             ) {
-                repeat(4) { index ->
+                repeat(6) { index ->
                     val char = otpCode.getOrNull(index)?.toString() ?: ""
                     Box(
                         modifier = Modifier
-                            .size(60.dp)
+                            .size(48.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(if (char.isNotEmpty()) Color(0xFFE8F5EE) else Color(0xFFF5F5F5))
+                            .background(
+                                when {
+                                    error != null -> Color(0xFFFFF0F0)
+                                    char.isNotEmpty() -> Color(0xFFE8F5EE)
+                                    else -> Color(0xFFF5F5F5)
+                                }
+                            )
                             .border(
-                                width = 1.dp,
-                                color = if (char.isNotEmpty()) green else Color.Transparent,
+                                width = 1.5.dp,
+                                color = when {
+                                    error != null -> Color(0xFFD32F2F)
+                                    char.isNotEmpty() -> green
+                                    else -> Color.Transparent
+                                },
                                 shape = RoundedCornerShape(12.dp)
                             ),
                         contentAlignment = Alignment.Center
@@ -186,40 +257,70 @@ fun OtpVerificationScreen(phoneNumber: String, onVerify: (String) -> Unit, onBac
                             text = char,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                            color = green
+                            color = if (error != null) Color(0xFFD32F2F) else green
                         )
                     }
                 }
             }
 
-            // Hidden TextField to manage input
+            // Hidden TextField to capture keyboard input
             TextField(
                 value = otpCode,
-                onValueChange = { if (it.length <= 4 && it.all { c -> c.isDigit() }) otpCode = it },
+                onValueChange = { input ->
+                    if (input.length <= 6 && input.all { it.isDigit() }) otpCode = input
+                },
                 modifier = Modifier
-                    .size(280.dp, 60.dp)
+                    .size(336.dp, 60.dp)
                     .alpha(0f)
                     .focusRequester(focusRequester),
+                enabled = !isLoading,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
         }
 
-        Spacer(modifier = Modifier.height(48.dp))
+        // Error message
+        AnimatedVisibility(
+            visible = error != null,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            error?.let {
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = it,
+                    color = Color(0xFFD32F2F),
+                    fontSize = 13.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
 
         Button(
-            onClick = { if (otpCode.length == 4) onVerify(otpCode) },
+            onClick = { if (otpCode.length == 6) onVerify(otpCode) },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(56.dp),
             shape = RoundedCornerShape(12.dp),
             colors = ButtonDefaults.buttonColors(containerColor = green),
-            enabled = otpCode.length == 4
+            enabled = otpCode.length == 6 && !isLoading
         ) {
-            Text("Verify & Continue", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(24.dp),
+                    strokeWidth = 2.5.dp
+                )
+            } else {
+                Text("Verify & Continue", fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            }
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Resend countdown timer
         var timer by remember { mutableStateOf(60) }
         LaunchedEffect(Unit) {
             while (timer > 0) {
@@ -242,11 +343,15 @@ fun OtpVerificationScreen(phoneNumber: String, onVerify: (String) -> Unit, onBac
                 )
             } else {
                 TextButton(
-                    onClick = { timer = 60 },
-                    contentPadding = PaddingValues(0.dp)
+                    onClick = {
+                        timer = 60
+                        onResend()
+                    },
+                    contentPadding = PaddingValues(0.dp),
+                    enabled = !isLoading
                 ) {
                     Text(
-                        "Resend",
+                        text = "Resend",
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         color = green

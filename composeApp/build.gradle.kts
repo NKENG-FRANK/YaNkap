@@ -6,6 +6,10 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+
+    // Add the dependency for the Google services Gradle plugin
+    id("com.google.gms.google-services")
+
 }
 
 kotlin {
@@ -19,6 +23,14 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.camera.core)
+            implementation(libs.androidx.camera.camera2)
+            implementation(libs.androidx.camera.lifecycle)
+            implementation(libs.androidx.camera.view)
+            implementation(libs.google.mlkit.text.recognition)
+            // Firebase Phone Auth
+            implementation(libs.firebase.auth)
+            implementation(libs.kotlinx.coroutines.play.services)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)

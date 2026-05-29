@@ -19,9 +19,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun TransferScreen() {
+fun TransferScreen(initialRecipient: String? = null) {
     var amount by remember { mutableStateOf("") }
-    var recipient by remember { mutableStateOf("") }
+    var recipient by remember { mutableStateOf(initialRecipient ?: "") }
     
     val contacts = listOf(
         Contact("John D.", Color(0xFFFF9800)),

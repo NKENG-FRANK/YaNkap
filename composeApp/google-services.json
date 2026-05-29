@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "883275679148",
+    "project_id": "yankap-7945c",
+    "storage_bucket": "yankap-7945c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:883275679148:android:a7cc343fafe0b757e4e609",
+        "android_client_info": {
+          "package_name": "org.example.yankap"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2BScv9kXN4O2x8NPvTNSlnBesE19mQx8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
